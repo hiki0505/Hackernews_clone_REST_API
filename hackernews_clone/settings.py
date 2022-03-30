@@ -21,22 +21,19 @@ import django_heroku
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DOCKER_PROD_FLAG = False
-HEROKU_PROD_FLAG = True
+DOCKER_PROD_FLAG = True
+HEROKU_PROD_FLAG = False
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = config('SECRET_KEY')
-# SECRET_KEY = 'django-insecure-h8wx^=-uulw*8!ok*c6c+8pv)+d1z%t8zrts+-x)_5th-5_@&n'
 if HEROKU_PROD_FLAG:
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    DEBUG = os.environ.get('DEBUG')
 elif DOCKER_PROD_FLAG:
     SECRET_KEY = config('SECRET_KEY')
-# '47e15374f9a10c94254d4bd111b97115e0100d0969609041'
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = config('DEBUG', cast=bool, default=True)
-DEBUG = True
+    DEBUG = config('DEBUG', cast=bool, default=True)
+
 ALLOWED_HOSTS = ['*']
 
 
@@ -108,23 +105,24 @@ WSGI_APPLICATION = "hackernews_clone.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+if HEROKU_PROD_FLAG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
     }
-}
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('POSTGRES_DB'),
-#         'USER': config('POSTGRES_USER'),
-#         'PASSWORD': config('POSTGRES_PASSWORD'),
-#         'HOST': 'pgdb',
-#         'PORT': 5432,
-#     }
-# }
+elif DOCKER_PROD_FLAG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('POSTGRES_DB'),
+            'USER': config('POSTGRES_USER'),
+            'PASSWORD': config('POSTGRES_PASSWORD'),
+            'HOST': 'pgdb',
+            'PORT': 5432,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
